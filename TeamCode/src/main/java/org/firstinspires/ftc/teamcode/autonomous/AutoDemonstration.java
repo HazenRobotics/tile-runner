@@ -4,6 +4,9 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.DistanceSensor;
+
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 @Autonomous(name = "AutoDemonstration", group = "autonomous")
 public class AutoDemonstration extends LinearOpMode {
@@ -15,6 +18,8 @@ public class AutoDemonstration extends LinearOpMode {
     DcMotor backLeft;
     DcMotor backRight;
 
+    DistanceSensor distanceSensor;
+
     @Override
     public void runOpMode() throws InterruptedException {
 
@@ -23,99 +28,83 @@ public class AutoDemonstration extends LinearOpMode {
         backLeft = hardwareMap.dcMotor.get("backLeft");
         backRight = hardwareMap.dcMotor.get("backRight");
 
-        frontRight.setDirection(DcMotorSimple.Direction.REVERSE );
-        backRight.setDirection(DcMotorSimple.Direction.REVERSE );
+        frontRight.setDirection(DcMotorSimple.Direction.REVERSE);
+        backRight.setDirection(DcMotorSimple.Direction.REVERSE);
 
-        telemetry.addLine( CLASS_NAME + " : finished init" );
-        telemetry.update();
+        distanceSensor = hardwareMap.get(DistanceSensor.class, "sensorRange");
+
+        addAndUpdate(CLASS_NAME + " : finished init");
 
         waitForStart();
 
         double globalPower = 0.5;
 
-        setPowers( globalPower, globalPower, globalPower, globalPower );
+        drive(globalPower);
 
+        // distance to travel in feet
+        double distanceToMove = 2;
+
+        // will get caught in loop while we haven't moved distanceToMove
+        while( distanceSensor.getDistance(DistanceUnit.INCH) > distanceToMove * 12 )
+            addAndUpdate( "Currently " + distanceSensor.getDistance(DistanceUnit.INCH) + " inches away from target");
+
+        stopMoving( );
+
+        addAndUpdate( "finished" );
+    }
+
+    public void addAndUpdate( String text ) {
+        telemetry.addLine( text );
+        telemetry.update();
+
+    }
+
+    public void stopMoving( ) {
+        drive( -1 );
+        sleepRobot( 100 );
+        drive( 0 );
+    }
+
+    public void sleepRobot(long time) {
         long startTime = System.currentTimeMillis();
-        while( startTime + 2*1000 > System.currentTimeMillis() );
-
-        rotateClockwise(globalPower, globalPower, globalPower, globalPower );
-        while( startTime + 4.5*1000 > System.currentTimeMillis() );
-        strafeRight(globalPower, globalPower, globalPower, globalPower );
-        while(startTime + 7.5*1000 > System.currentTimeMillis())
-
-        /*setPowers( -globalPower, -globalPower, -globalPower, -globalPower );
-
-        while( startTime + 4*1000 > System.currentTimeMillis() );
-
-        rotateCounterClockwise(globalPower,globalPower,globalPower,globalPower);
-
-        while( startTime + 4.56*1000 > System.currentTimeMillis() );
-
-        strafeRight(globalPower,globalPower,globalPower,globalPower);
-
-        while( startTime + 6.56*1000 > System.currentTimeMillis() );
-
-        strafeLeft(globalPower,globalPower,globalPower,globalPower);
-
-        while( startTime + 8.56*1000 > System.currentTimeMillis() );
-
-        rotateClockwise(globalPower,globalPower,globalPower,globalPower);
-
-        while( startTime + 9.125*1000 > System.currentTimeMillis() );*/
-
-            globalPower = 0;
-        setPowers( globalPower, globalPower, globalPower, globalPower );
-
+        while (startTime + time > System.currentTimeMillis()) ;
     }
 
-    public void rotateCounterClockwise( double frontLeftPower, double frontRightPower, double backLeftPower, double backRightPower ) {
-        frontLeft.setPower( frontLeftPower );
-        frontRight.setPower( frontRightPower );
-        backLeft.setPower( -backLeftPower );
-        backRight.setPower( -backRightPower );
-
-        telemetry.addLine( "FL: " + frontLeftPower + ", FR: " + frontRightPower );
-        telemetry.update();
+    /**
+     * drive the robot using a designated power
+     * @param power to drive the robot (+ is forward, - is backward)
+     */
+    public void drive(double power) {
+        setPowers(power, power, power, power);
     }
 
-    public void rotateClockwise( double frontLeftPower, double frontRightPower, double backLeftPower, double backRightPower ) {
-        frontLeft.setPower( -frontLeftPower );
-        frontRight.setPower( -frontRightPower );
-        backLeft.setPower( backLeftPower );
-        backRight.setPower( backRightPower );
+    /**
+     * strafe the robot using designated power
+     * @param power to strafe the robot (+ is right, - is left)
+     */
+    public void strafe(double power) {
 
-        telemetry.addLine( "FL: " + frontLeftPower + ", FR: " + frontRightPower );
-        telemetry.update();
+        setPowers( power, -power, -power, power );
     }
 
-    public void strafeLeft( double frontLeftPower, double frontRightPower, double backLeftPower, double backRightPower ) {
-        frontLeft.setPower( -frontLeftPower );
-        frontRight.setPower( frontRightPower );
-        backLeft.setPower( backLeftPower );
-        backRight.setPower( -backRightPower );
+    /**
+     * rotate the robot using designated power
+     * @param power to rotate the robot (+ is right, - is left)
+     */
+    public void rotate(double power) {
 
-        telemetry.addLine( "FL: " + frontLeftPower + ", FR: " + frontRightPower );
-        telemetry.update();
+        setPowers( -power, -power, power, power );
     }
 
-    public void strafeRight( double frontLeftPower, double frontRightPower, double backLeftPower, double backRightPower ) {
-        frontLeft.setPower( frontLeftPower );
-        frontRight.setPower( -frontRightPower );
-        backLeft.setPower( -backLeftPower );
-        backRight.setPower( backRightPower );
+    public void setPowers(double frontLeftPower, double frontRightPower, double backLeftPower, double backRightPower) {
 
-        telemetry.addLine( "FL: " + frontLeftPower + ", FR: " + frontRightPower );
-        telemetry.update();
-    }
+        frontLeft.setPower(frontLeftPower);
+        frontRight.setPower(frontRightPower);
+        backLeft.setPower(backLeftPower);
+        backRight.setPower(backRightPower);
 
-    public void setPowers( double frontLeftPower, double frontRightPower, double backLeftPower, double backRightPower ) {
-
-        frontLeft.setPower( frontLeftPower );
-        frontRight.setPower( frontRightPower );
-        backLeft.setPower( backLeftPower );
-        backRight.setPower( backRightPower );
-
-        telemetry.addLine( "FL: " + frontLeftPower + ", FR: " + frontRightPower );
+        telemetry.addLine("FL: " + frontLeftPower + ", FR: " + frontRightPower);
+        telemetry.addLine("BL: " + backLeftPower + ", BR: " + backRightPower);
         telemetry.update();
 
     }

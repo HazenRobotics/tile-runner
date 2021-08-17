@@ -38,18 +38,23 @@ public class MazeSolver extends LinearOpMode {
         waitForStart();
 
         double globalPower = 0.5;
-        double distanceThreshold = 24;
-
+        double distanceThreshold = 6; // in inches
+        int unit = 24;
+        double initialDistance;
+        
         while (opModeIsActive()) {
-            if (distanceSensor.getDistance(DistanceUnit.INCH) > distanceThreshold)
+            initialDistance = distanceSensor.getDistance(DistanceUnit.INCH);
+            while (distanceSensor.getDistance(DistanceUnit.INCH) >= initialDistance - unit){
                 drive(globalPower);
-            else {
-                drive(-1);
-                sleepRobot(100);
-                rotate(globalPower);
-                sleepRobot(500);
+                addAndUpdate( "Currently " + distanceSensor.getDistance(DistanceUnit.INCH) + " inches away from target");
+                if (distanceSensor.getDistance(DistanceUnit.INCH) < distanceThreshold)
+                    break;
             }
-            addAndUpdate( "Currently " + distanceSensor.getDistance(DistanceUnit.INCH) + " inches away from target");
+            while (distanceSensor.getDistance(DistanceUnit.INCH) < unit) {
+                rotate(1);
+                sleepRobot(1250);
+                addAndUpdate( "Currently " + distanceSensor.getDistance(DistanceUnit.INCH) + " inches away from target");
+            }
         }
 
         /* drive(globalPower);

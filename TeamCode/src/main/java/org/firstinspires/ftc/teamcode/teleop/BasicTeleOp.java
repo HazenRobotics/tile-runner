@@ -34,7 +34,48 @@ public class BasicTeleOp extends OpMode {
         distanceSensor = hardwareMap.get(DistanceSensor.class, "sensorRange");
 
         addAndUpdate(CLASS_NAME + " : finished init");
+
+        moveForwardTime( 5000 );
+
     }
+
+    /**
+     *
+     * @return the distance the robot has travelled in inches
+     */
+    public int howFarHaveWeMoved( ) {
+
+        int distanceTravelled = 0;
+
+        distanceTravelled = frontLeft.getCurrentPosition() / 4 * 12;
+
+        return distanceTravelled;
+    }
+
+    /**
+     *
+     * @param timeToMove the amount of time to move the robot forward in milliseconds
+     */
+    public void moveForwardTime( long timeToMove ) {
+
+        // set motor power to something
+        frontLeft.setPower( 1 );
+        frontRight.setPower( 1 );
+        backRight.setPower( 1 );
+        backLeft.setPower( 1 );
+
+        // move specified time
+        long startTime = System.currentTimeMillis( );
+        while( startTime + timeToMove > System.currentTimeMillis( ) );
+
+        // stop
+        frontLeft.setPower( 0 );
+        frontRight.setPower( 0 );
+        backRight.setPower( 0 );
+        backLeft.setPower( 0 );
+
+    }
+
 
     @Override
     public void loop() {

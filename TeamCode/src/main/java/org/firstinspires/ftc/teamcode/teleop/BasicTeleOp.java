@@ -45,11 +45,7 @@ public class BasicTeleOp extends OpMode {
      */
     public int howFarHaveWeMoved( ) {
 
-        int distanceTravelled = 0;
-
-        distanceTravelled = frontLeft.getCurrentPosition() / 4 * 12;
-
-        return distanceTravelled;
+        return frontLeft.getCurrentPosition() / 4 * 12;
     }
 
     /**
